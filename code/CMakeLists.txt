@@ -53,8 +53,16 @@ set(CPACK_DEBIAN_PACKAGE_SECTION "utils")
 set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
 set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://github.com/yourname/qt-hello-world")
 
-# Set package file name
-set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_${PROJECT_VERSION}_amd64")
+# Detect architecture
+if(CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64" OR CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
+    set(PACKAGE_ARCH "arm64")
+else()
+    set(PACKAGE_ARCH "amd64")
+endif()
+
+# Set package file name with correct architecture
+set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_${PROJECT_VERSION}_${PACKAGE_ARCH}")
+set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "${PACKAGE_ARCH}")
 
 # Enable DEB generator
 set(CPACK_GENERATOR "DEB")

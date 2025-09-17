@@ -1,0 +1,33 @@
+name: Test Build
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Test Docker build
+      run: |
+        echo "🔨 Testing Docker build..."
+        docker build -f Dockerfile.Build -t qt-hello-world-test .
+        
+        echo "📦 Testing package extraction..."
+        mkdir -p output
+        CONTAINER_ID=$(docker create qt-hello-world-test)
+        docker cp $CONTAINER_ID:/output/ ./
+        docker rm $CONTAINER_ID
+        
+        # Verify package was created
+        if [ ! -f output/*.deb ]; then
+          echo "❌ No .deb package found!"
+          exit 1
+        fi
+        
+        echo "✅ Build test passed!"
+        ls -la output/

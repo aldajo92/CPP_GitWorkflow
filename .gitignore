@@ -60,6 +60,9 @@ Thumbs.db
 # Docker
 .docker/
 
+# GitHub Actions
+.github/workflows/*.log
+
 # Temporary files
 *.tmp
 *.temp
