@@ -1,0 +1,55 @@
+name: Build Qt Hello World Package
+
+on:
+  push:
+    branches: [ ci_config ]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  build-deb:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [linux/arm64]
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Set platform variables
+      run: |
+        PLATFORM="${{ matrix.platform }}"
+        ARCH=$(echo $PLATFORM | cut -d'/' -f2)
+        echo "ARCH=$ARCH" >> $GITHUB_ENV
+        echo "PLATFORM=$PLATFORM" >> $GITHUB_ENV
+        
+    - name: Build Docker image for ${{ matrix.platform }}
+      run: |
+        echo "🔨 Building Docker image for ${{ matrix.platform }}..."
+        docker buildx build \
+          --platform ${{ matrix.platform }} \
+          -f Dockerfile.Build \
+          -t qt-hello-world-build-${{ env.ARCH }} \
+          --load \
+          .
+        
+    - name: Extract .deb package
+      run: |
+        echo "📦 Extracting .deb package for ${{ env.ARCH }}..."
+        mkdir -p output
+        CONTAINER_ID=$(docker create qt-hello-world-build-${{ env.ARCH }})
+        docker cp $CONTAINER_ID:/output/ ./
+        docker rm $CONTAINER_ID
+        
+        echo "✅ Package created for ${{ env.ARCH }}:"
+        ls -la output/
+        
+    - name: Upload .deb package
+      uses: actions/upload-artifact@v4
+      with:
+        name: qt-hello-world-deb-${{ env.ARCH }}
+        path: output/*.deb
+        retention-days: 30

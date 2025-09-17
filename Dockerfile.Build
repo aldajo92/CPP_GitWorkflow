@@ -58,7 +58,7 @@ RUN cd build && \
 
 # Create output directory and copy the generated .deb package
 RUN mkdir -p /output && \
-    cp /code/build/qt-hello-world_1.0.0_amd64.deb /output/
+    cp /code/build/*.deb /output/
 
 # Set the default command
-CMD ["cp", "/output/qt-hello-world_1.0.0_amd64.deb", "/host-output/"]
+CMD ["sh", "-c", "cp /output/*.deb /host-output/"]
