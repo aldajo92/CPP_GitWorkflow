@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Qt Hello World
+Comment=Toggle Hello World text visibility
+Exec=QtHelloWorld
+Icon=applications-utilities
+Terminal=false
+Categories=Utility;

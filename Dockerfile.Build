@@ -8,7 +8,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=UTC
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-# Install system dependencies
+# Install system dependencies including packaging tools
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
@@ -28,6 +28,10 @@ RUN apt-get update && apt-get install -y \
     libxcb-render-util0 \
     libxcb-shape0 \
     libxcb-xfixes0 \
+    debhelper \
+    dh-make \
+    devscripts \
+    fakeroot \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the source code
@@ -48,5 +52,13 @@ RUN mkdir -p build && \
     cmake .. && \
     make
 
+# Generate .deb package using CPack
+RUN cd build && \
+    cpack
+
+# Create output directory and copy the generated .deb package
+RUN mkdir -p /output && \
+    cp /code/build/qt-hello-world_1.0.0_amd64.deb /output/
+
 # Set the default command
-CMD ["./build/QtHelloWorld"]
+CMD ["cp", "/output/qt-hello-world_1.0.0_amd64.deb", "/host-output/"]
